@@ -7,7 +7,7 @@ app = Flask(__name__)
 # Página principal (confirmación de que el servidor está activo)
 @app.route('/')
 def index():
-    return "Servidor Flask activo ✅"
+    return "Servidor, nuevo, Flask activo ✅, from C"
 
 # Endpoint para recibir datos del SIM7600
 @app.route('/datos', methods=['POST'])
@@ -34,4 +34,5 @@ def recibir_datos():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+
 
