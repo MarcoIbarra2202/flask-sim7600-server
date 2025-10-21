@@ -4,29 +4,34 @@ import os
 
 app = Flask(__name__)
 
-# Carpeta donde se guardarán los datos
-if not os.path.exists("data"):
-    os.makedirs("data")
-
+# Página principal (confirmación de que el servidor está activo)
 @app.route('/')
-def home():
+def index():
     return "Servidor Flask activo ✅"
 
+# Endpoint para recibir datos del SIM7600
 @app.route('/datos', methods=['POST'])
 def recibir_datos():
     try:
         data = request.get_json()
-        print(f"📦 Datos recibidos: {data}")
+        if not data:
+            return jsonify({"error": "JSON vacío o formato inválido"}), 400
 
-        # Guardar en archivo (uno por día)
-        fecha = datetime.now().strftime("%Y-%m-%d")
-        with open(f"data/{fecha}.txt", "a") as f:
-            f.write(str(data) + "\n")
+        # Guardar los datos en un archivo dentro del servidor
+        fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        linea = f"{fecha} - {data}\n"
+        with open("datos_recibidos.txt", "a") as f:
+            f.write(linea)
 
-        return jsonify({"status": "ok", "msg": "Datos recibidos correctamente"}), 200
+        print(f"📩 Dato recibido: {data}")
+        return jsonify({"status": "ok", "received": data}), 200
+
     except Exception as e:
         print("❌ Error:", e)
-        return jsonify({"status": "error", "msg": str(e)}), 500
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
+
